@@ -32,6 +32,7 @@ import org.ethereum.cli.CLIInterface;
 import org.ethereum.config.DefaultConfig;
 import org.ethereum.config.SystemProperties;
 import org.ethereum.rpc.JsonRpcNettyServer;
+import org.ethereum.rpc.JsonRpcWeb3FilterHandler;
 import org.ethereum.rpc.JsonRpcWeb3ServerHandler;
 import org.ethereum.rpc.Web3;
 import org.ethereum.util.FileUtil;
@@ -121,11 +122,13 @@ public class Start {
     private void enableRpc(Rsk rsk) throws Exception {
         Web3 web3Service = new Web3RskImpl(rsk, minerServer, minerClient);
         JsonRpcWeb3ServerHandler serverHandler = new JsonRpcWeb3ServerHandler(web3Service, RskSystemProperties.CONFIG.getRpcModules(), RskSystemProperties.CONFIG.corsDomains());
+        JsonRpcWeb3FilterHandler filterHandler = new JsonRpcWeb3FilterHandler(RskSystemProperties.CONFIG.corsDomains());
         new JsonRpcNettyServer(
             RskSystemProperties.CONFIG.rpcPort(),
             RskSystemProperties.CONFIG.soLingerTime(),
             Boolean.TRUE,
             new CorsConfiguration(),
+            filterHandler,
             serverHandler
         ).start();
     }

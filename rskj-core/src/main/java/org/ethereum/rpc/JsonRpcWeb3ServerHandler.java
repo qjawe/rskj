@@ -38,17 +38,10 @@ public class JsonRpcWeb3ServerHandler extends SimpleChannelInboundHandler<FullHt
     private final ObjectMapper mapper = new ObjectMapper();
     private final JsonNodeFactory jsonNodeFactory = JsonNodeFactory.instance;
     private final JsonRpcFilterServer jsonRpcServer;
-    private OriginValidator originValidator;
 
-    public JsonRpcWeb3ServerHandler(Web3 service, List<ModuleDescription> filteredModules, String corsOrigins) {
+    public JsonRpcWeb3ServerHandler(Web3 service, List<ModuleDescription> filteredModules) {
         this.jsonRpcServer = new JsonRpcFilterServer(service, service.getClass(), filteredModules);
         jsonRpcServer.setErrorResolver(new MultipleErrorResolver(new RskErrorResolver(), AnnotationsErrorResolver.INSTANCE, DefaultErrorResolver.INSTANCE));
-
-        try {
-            this.originValidator = new OriginValidator(corsOrigins);
-        } catch (URISyntaxException e) {
-            LOGGER.error("Error creating OriginValidator, origins {}", corsOrigins);
-        }
     }
 
     @Override
@@ -56,26 +49,7 @@ public class JsonRpcWeb3ServerHandler extends SimpleChannelInboundHandler<FullHt
         HttpMethod httpMethod = request.getMethod();
         HttpResponse response;
         if (HttpMethod.POST.equals(httpMethod)) {
-            HttpHeaders headers = request.headers();
-
-            String contentType = headers.get(HttpHeaders.Names.CONTENT_TYPE);
-            String origin = headers.get(HttpHeaders.Names.ORIGIN);
-            String referer = headers.get(HttpHeaders.Names.REFERER);
-
-            if (!"application/json".equals(contentType)) {
-                LOGGER.error("Unsupported content type");
-                response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNSUPPORTED_MEDIA_TYPE);
-            }
-            else if (origin != null && !this.originValidator.isValidOrigin(origin)) {
-                LOGGER.error("Invalid origin");
-                response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN);
-            }
-            else if (referer != null && !this.originValidator.isValidReferer(referer)) {
-                LOGGER.error("Invalid referer");
-                response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.FORBIDDEN);
-            }
-            else
-                response = processRequest(request);
+            response = processRequest(request);
         } else {
             response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_IMPLEMENTED);
         }

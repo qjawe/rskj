@@ -32,7 +32,7 @@ public class JsonRpcWeb3FilterHandler extends SimpleChannelInboundHandler<FullHt
         try {
             this.originValidator = new OriginValidator(corsOrigins);
         } catch (URISyntaxException e) {
-            LOGGER.error("Error creating OriginValidator, origins {}", corsOrigins);
+            LOGGER.error("Error creating OriginValidator, origins {}, {}", corsOrigins, e);
         }
     }
 

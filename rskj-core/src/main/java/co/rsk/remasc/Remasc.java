@@ -19,6 +19,7 @@
 package co.rsk.remasc;
 
 import co.rsk.config.RemascConfig;
+import co.rsk.peg.Bridge;
 import org.apache.commons.collections4.CollectionUtils;
 import org.ethereum.core.Block;
 import org.ethereum.core.BlockHeader;
@@ -27,6 +28,7 @@ import org.ethereum.core.Transaction;
 import org.ethereum.db.BlockStore;
 import org.ethereum.util.BIUtil;
 import org.ethereum.util.FastByteComparisons;
+import org.ethereum.vm.DataWord;
 import org.ethereum.vm.PrecompiledContracts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,6 +115,19 @@ public class Remasc {
         BigInteger payToRskLabs = fullBlockReward.divide(BigInteger.valueOf(remascConstants.getRskLabsDivisor()));
         transfer(remascConstants.getRskLabsAddress(), payToRskLabs);
         fullBlockReward = fullBlockReward.subtract(payToRskLabs);
+
+        // Pay Federation labs cut
+        /* WIP
+        Repository processingRepository = repository.getSnapshotTo(processingBlockHeader.getStateRoot());
+        Bridge bridge = (Bridge)PrecompiledContracts.getContractForAddress(new DataWord(Hex.decode(PrecompiledContracts.BRIDGE_ADDR)));
+        bridge.init(null, null, repository, null, null, null);
+
+        if (bridge.getFederationSize(null).intValue() != 0) {
+            BigInteger payToFederation = fullBlockReward.divide(BigInteger.valueOf(remascConstants.getFederationDivisor()));
+            // TODO transfer to federators
+            fullBlockReward = fullBlockReward.subtract(payToFederation);
+        }
+        */
 
         List<Sibling> siblings = provider.getSiblings().get(processingBlockNumber);
 

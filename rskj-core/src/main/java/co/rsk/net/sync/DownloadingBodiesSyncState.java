@@ -57,7 +57,6 @@ public class DownloadingBodiesSyncState  extends BaseSyncState {
         this.pendingHeaders = pendingHeaders;
         this.skeletons = skeletons;
         this.segmentByNode = new HashMap<>();
-        this.suitablePeers = new ArrayList<>(skeletons.keySet());
         this.chunksBySegment = new ArrayList<>();
         this.chunksBeingDownloaded = new HashMap<>();
         this.segmentsBeingDownloaded = new HashMap<>();
@@ -191,6 +190,7 @@ public class DownloadingBodiesSyncState  extends BaseSyncState {
     @Override
     public void onEnter() {
         initializeSegments();
+        suitablePeers = new ArrayList<>(segmentByNode.keySet());
         startDownloading(suitablePeers);
     }
 
